@@ -44,6 +44,7 @@ param nullableParam string?
 
 @description('Secure parameter')
 @secure()
+#disable-next-line no-unused-params
 param secureValue string
 
 @description('Variable description from source parser')
@@ -64,6 +65,16 @@ output resourceId string = stg.id
 
 @description('Custom output')
 output customOutput positiveInt = 42
+
+@description('Object output')
+output objectOutput object = {
+  key1: name
+  key2: location
+  key3: tags
+  key4: customTypeParam
+  key5: nullableParam
+  key6: computedName
+}
 "@ | Set-Content -Path $Path -NoNewline
     }
 }

@@ -701,7 +701,7 @@ function Get-UsageSection {
     return $builder.ToString().TrimEnd("`r", "`n")
 }
 
-function New-BicepDocsMarkdown {
+function New-BicepMarkdown {
     param(
         [string]$BicepFilePath,
         [object]$Template,
@@ -897,7 +897,7 @@ function New-BicepReadme {
         $tempFile = Invoke-BicepBuild -BicepFilePath $resolvedInput
 
         $template = Get-Content -Path $tempFile -Raw | ConvertFrom-Json -Depth 100
-        $markdown = New-BicepDocsMarkdown -BicepFilePath $resolvedInput -Template $template -SourceInfo $sourceInfo -Sections $sections
+        $markdown = New-BicepMarkdown -BicepFilePath $resolvedInput -Template $template -SourceInfo $sourceInfo -Sections $sections
 
         Set-Content -Path $resolvedOutput -Value $markdown -NoNewline
         if ($VerboseOutput) {
