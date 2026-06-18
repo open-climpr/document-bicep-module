@@ -18,57 +18,20 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Normalize module path
-      id: normalize-params
+    - name: Write README
       shell: pwsh
       env:
         rootPath: ${{ inputs.root-path }}
         moduleName: ${{ inputs.module-name }}
       run: |
-        #* Normalize module name
+        #* Normalize module path
         $rootPath = $env:rootPath.Trim("/")
         $moduleName = $env:moduleName.ToLower().Trim("/")
         $moduleDir = Join-Path $rootPath $moduleName
 
-        #* Write outputs
-        Write-Output "root-path=$rootPath" >> $env:GITHUB_OUTPUT
-        Write-Output "module-name=$moduleName" >> $env:GITHUB_OUTPUT
-        Write-Output "module-dir=$moduleDir" >> $env:GITHUB_OUTPUT
-
-    - name: Install PS Modules
-      uses: open-climpr/install-psmodules@v1
-      with:
-        modules: |
-          Az.Accounts:3.0.0
-          Az.Resources:7.1.0
-          PSDocs.Azure:0.3.0
-
-    - name: Bicep Build
-      uses: Azure/bicep-build-action@v1.0.1
-      with:
-        bicepFilePath: ${{ steps.normalize-params.outputs.module-dir }}/main.bicep
-        outputFilePath: ${{ steps.normalize-params.outputs.module-dir }}/main.json
-
-    - name: Write README
-      shell: pwsh
-      env:
-        moduleDir: ${{ steps.normalize-params.outputs.module-dir }}
-      run: |
         #* Write README
-
-        Get-AzDocTemplateFile -Path $env:moduleDir/main.json | ForEach-Object {
-          $template = Get-Item -Path $_.TemplateFile
-          
-          $options = @{
-            'Configuration.AZURE_USE_PARAMETER_FILE_SNIPPET' = $true
-            'Configuration.SAMPLE_USE_PARAMETERS_SNIPPET'    = $true
-            'Configuration.AZURE_USE_COMMAND_LINE_SNIPPET'   = $true
-            'Output.Culture'                                 = "en-US"
-          }
-
-          Invoke-PSDocument -Module PSDocs.Azure -InputObject $template.FullName -OutputPath $env:moduleDir -InstanceName "README" -Option $options
-          git add $env:moduleDir/README.md
-        }
+        & "${{ github.action_path }}/src/New-BicepReadme.ps1" -InputPath $moduleDir
+        git add $moduleDir/README.md
 
     - name: Set Git config
       shell: pwsh
