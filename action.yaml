@@ -28,9 +28,10 @@ runs:
         $rootPath = $env:rootPath.Trim("/")
         $moduleName = $env:moduleName.ToLower().Trim("/")
         $moduleDir = Join-Path $rootPath $moduleName
+        $moduleFile = Join-Path $moduleDir "main.bicep"
 
         #* Write README
-        & "${{ github.action_path }}/src/New-BicepReadme.ps1" -InputPath $moduleDir
+        & "${{ github.action_path }}/src/New-BicepReadme.ps1" -InputPath $moduleFile
         git add $moduleDir/README.md
 
     - name: Set Git config
